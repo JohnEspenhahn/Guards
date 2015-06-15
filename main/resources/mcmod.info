@@ -1,0 +1,16 @@
+[
+{
+  "modid": "gaurds",
+  "name": "Gaurds",
+  "description": "Spawn npc guards to guard yo' shit.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["John Espenhahn"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
