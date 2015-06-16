@@ -3,8 +3,6 @@ package com.hahn.guards.entity;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 
-import com.hahn.guards.EntityStoneGolem;
-
 public class GuardEntitySelector implements IEntitySelector {
 	EntityStoneGolem guard;
 	

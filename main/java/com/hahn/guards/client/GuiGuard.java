@@ -7,13 +7,16 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
-import com.hahn.guards.EntityStoneGolem;
+import com.hahn.guards.Guards;
+import com.hahn.guards.entity.EntityStoneGolem;
+import com.hahn.guards.network.SynchGuardStance;
 import com.hahn.guards.util.Text;
 
 import cpw.mods.fml.relauncher.Side;
@@ -97,15 +100,15 @@ public class GuiGuard extends GuiScreen {
     protected void actionPerformed(GuiButton btn) {
         if (btn.enabled) {
         	if (btn.id == TOGGLE) {
+        		NBTTagCompound nbt = new NBTTagCompound();
         		if (guard.isFollowing()) {
-        			guard.setFollowing(false);
-        			guard.setHomeArea(guard.chunkCoordX, guard.chunkCoordY, guard.chunkCoordZ, 8);
+        			EntityStoneGolem.writeGuardStance(nbt, 32, 8, false);
         			
-        			
+        			Guards.net.sendToServer(new SynchGuardStance(guard.getEntityId(), nbt));
         		} else {
-        			guard.setFollowing(true);
+        			EntityStoneGolem.writeGuardStance(nbt, 32, 0, true);
         			
-        			// TODO packet hander
+        			Guards.net.sendToServer(new SynchGuardStance(guard.getEntityId(), nbt));
         		}
         	}
         }

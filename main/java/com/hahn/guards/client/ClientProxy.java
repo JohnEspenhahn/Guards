@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.DimensionManager;
 
 import com.hahn.guards.CommonProxy;
-import com.hahn.guards.EntityStoneGolem;
+import com.hahn.guards.entity.EntityStoneGolem;
 
 import cpw.mods.fml.client.registry.RenderingRegistry;
 

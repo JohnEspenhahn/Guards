@@ -1,29 +1,30 @@
-package com.hahn.guards;
+package com.hahn.guards.entity;
 
 import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import com.hahn.guards.entity.EntityAIMoveToHome;
-import com.hahn.guards.entity.EntityAIGuardFollow;
-import com.hahn.guards.entity.GuardEntitySelector;
-import com.hahn.guards.entity.IOwned;
-import com.hahn.guards.entity.IWanderer;
+import com.hahn.guards.GuardEventHandler;
+import com.hahn.guards.Guards;
+import com.hahn.guards.GuiHandler;
 
 public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwned {
 	private static int FOLLOWING = 13, CHASE = 14, STATION = 15, OWNER = 19;
@@ -38,8 +39,28 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
         this.tasks.addTask(4, new EntityAIWander(this, 0.6D));
         this.tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(6, new EntityAILookIdle(this));
-        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, new GuardEntitySelector(this)));
+        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget(this, Entity.class, 5, false, true, new GuardEntitySelector(this)));
     }
+	
+	@Override
+	protected void updateAITick() {
+		// Disable iron golem village ticking
+	}
+	
+	@Override
+	protected void applyEntityAttributes() {
+	    super.applyEntityAttributes(); 
+
+	   // standard attributes registered to EntityLivingBase
+	   // getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
+	   getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.4D);
+	   // getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(0.8D);
+	   // getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(16.0D);
+
+	   // need to register any additional attributes
+	   // getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage);
+	   // getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
+	}
 	
 	@Override
     protected void entityInit() {
@@ -94,20 +115,43 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
     public void writeEntityToNBT(NBTTagCompound nbt) {
 		super.writeEntityToNBT(nbt);
 		
-		nbt.setInteger("chaseRange", getChaseRange());
-		nbt.setInteger("stationRadius", getStationRadius());
-		nbt.setBoolean("following", isFollowing());
 		nbt.setString("ownerName", getOwnerName());
+		writeGuardStance(nbt);		
 	}
 	
 	@Override
 	public void readEntityFromNBT(NBTTagCompound nbt) {
 		super.readEntityFromNBT(nbt);
+
+		setOwnerName(nbt.getString("ownerName"));
+		readGuardStance(nbt);
+	}
+	
+	public void writeGuardStance(NBTTagCompound nbt) {
+    	EntityStoneGolem.writeGuardStance(nbt, getChaseRange(), getStationRadius(), isFollowing());
+    }
+
+	public static void writeGuardStance(NBTTagCompound nbt, int chaseRange, int stationRadius, boolean following) {
+		nbt.setInteger("chaseRange", chaseRange);
+		nbt.setInteger("stationRadius", stationRadius);
+		nbt.setBoolean("following", following);
+	}
+	
+	public void readGuardStance(NBTTagCompound nbt) {
+		int stationRadius = nbt.getInteger("stationRadius");
+		if (stationRadius > 0) {
+			if (!hasHome()) {
+				Vec3 pos = this.getPosition(0);
+				setHomeArea((int) pos.xCoord, (int) pos.yCoord, (int) pos.zCoord, stationRadius);
+			} else {
+				setStationRadius(stationRadius);
+			}
+		} else if (stationRadius <= 0) {
+			detachHome();
+		}
 		
 		setChaseRange(nbt.getInteger("chaseRange"));
-		setStationRadius(nbt.getInteger("stationRadius"));
 		setFollowing(nbt.getBoolean("following"));
-		setOwnerName(nbt.getString("ownerName"));
 	}
 	
 	public boolean isSuitableTarget(Entity e) {
@@ -176,7 +220,11 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
 	@Override
     public void detachHome() {
         super.detachHome();
-        setStationRadius(-1);
+        
+        boolean hasHome = this.hasHome();
+        if (getStationRadius() > 0) {
+        	setStationRadius(0);
+        }
     }
 	
 	@Override

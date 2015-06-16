@@ -3,8 +3,6 @@ package com.hahn.guards.entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 
-import com.hahn.guards.EntityStoneGolem;
-
 public class EntityAIGuardFindAttackableTarget extends EntityAINearestAttackableTarget {
     private final EntityStoneGolem guard;
 

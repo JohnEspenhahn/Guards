@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 
 import com.hahn.guards.client.GuiGuard;
 import com.hahn.guards.client.GuiGuardSpawner;
+import com.hahn.guards.entity.EntityStoneGolem;
 
 import cpw.mods.fml.common.network.IGuiHandler;
 

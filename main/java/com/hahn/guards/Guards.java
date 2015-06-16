@@ -20,6 +20,8 @@ import net.minecraftforge.common.MinecraftForge;
 import com.hahn.guards.command.CommandPeace;
 import com.hahn.guards.command.CommandRelations;
 import com.hahn.guards.command.CommandWar;
+import com.hahn.guards.entity.EntityStoneGolem;
+import com.hahn.guards.network.SynchGuardStance;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -29,8 +31,10 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = Guards.MODID, name = "Guards", version = Guards.VERSION)
 public class Guards {
@@ -42,6 +46,8 @@ public class Guards {
    
     @SidedProxy(clientSide="com.hahn.guards.client.ClientProxy", serverSide="com.hahn.guards.CommonProxy")
     public static CommonProxy proxy;
+    
+    public static SimpleNetworkWrapper net;
     
     public static Block GuardSpawnerBlock;
     
@@ -60,6 +66,9 @@ public class Guards {
 		
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, new GuiHandler());
 		MinecraftForge.EVENT_BUS.register(new GuardEventHandler());
+		
+		net = NetworkRegistry.INSTANCE.newSimpleChannel("hahnGuards");
+		net.registerMessage(SynchGuardStance.Handler.class, SynchGuardStance.class, 0, Side.SERVER);
     }
     
     @EventHandler

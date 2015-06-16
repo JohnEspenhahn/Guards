@@ -58,6 +58,6 @@ public class EntityAIMoveToHome extends EntityAIBase {
     }
     
     public boolean isWithinRadiusOfHome(int radius) {
-        return radius == -1.0F ? true : theEntity.getHomePosition().getDistanceSquared(MathHelper.floor_double(theEntity.posX), (int) theEntity.posY, MathHelper.floor_double(theEntity.posZ)) < radius * radius + 1;
+        return radius <= 0 ? true : theEntity.getHomePosition().getDistanceSquared(MathHelper.floor_double(theEntity.posX), (int) theEntity.posY, MathHelper.floor_double(theEntity.posZ)) < radius * radius + 1;
     }
 }

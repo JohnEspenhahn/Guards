@@ -1,5 +1,7 @@
 package com.hahn.guards;
 
+import com.hahn.guards.entity.EntityStoneGolem;
+
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -97,6 +99,8 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 				EntityStoneGolem golem = new EntityStoneGolem(worldObj);
 				golem.setOwnerName(getOwnerName());
 				golem.setHomeArea(xCoord, yCoord, zCoord, 8);
+				golem.setChaseRange(32);
+				golem.setFollowing(false);
 				
 				golem.setPosition(xCoord, yCoord, zCoord);
 				Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(golem, 6, 2, Vec3.createVectorHelper(this.xCoord, this.yCoord, this.zCoord));

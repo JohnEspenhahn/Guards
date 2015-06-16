@@ -5,7 +5,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.Vec3;
 
-import com.hahn.guards.EntityStoneGolem;
 import com.hahn.guards.util.Util;
 
 public class EntityAIGuardFollow extends EntityAIBase {
