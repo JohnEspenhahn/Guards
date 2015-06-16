@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,8 +17,8 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class GuardEventHandler implements Serializable {
-	private static Map<String, Map<String, Byte>> relations = new HashMap<String, Map<String, Byte>>();
-	private static Map<String, Integer> numGuards = new HashMap<String, Integer>();
+	private static Map<String, Map<String, Byte>> relations = new ConcurrentHashMap<String, Map<String, Byte>>();
+	private static Map<String, Integer> numGuards = new ConcurrentHashMap<String, Integer>();
 	
 	@SubscribeEvent
 	public void onLivingDeathEvent(LivingDeathEvent e) {
@@ -36,6 +37,7 @@ public class GuardEventHandler implements Serializable {
 			
 			if (factionName != null) {
 				String ownerName = e.entity.getEntityData().getString("ownerName");
+				System.out.println("Attacked golem of " + ownerName);
 				updateRelations(world, ownerName, factionName, -1);
 			}
 		}
@@ -90,6 +92,8 @@ public class GuardEventHandler implements Serializable {
 	}
 	
 	public static Byte getRelations(String thisName, String otherName) {
+		if (thisName.equals(otherName)) return 0;
+		
 		Map<String, Byte> relationsMap = getRelationsMap(thisName);		
 		Byte value = relationsMap.get(otherName);
 		if (value == null) {
@@ -101,19 +105,21 @@ public class GuardEventHandler implements Serializable {
 	}
 	
 	private static void setRelations(World world, String thisName, String otherName, byte value) {
+		if (thisName.equals(otherName)) return;
+		
 		Map<String, Byte> relationsMap = getRelationsMap(thisName);
 		byte oldValue = relationsMap.put(otherName, value);
 		
-		if (oldValue >= 0 && value < 0) {
-			// Make other faction angry
-			setRelations(world, otherName, thisName, (byte) -100);
-			
+		if (oldValue >= 0 && value < 0) {			
 			// Send messages
 			EntityPlayer thisPlayer = world.getPlayerEntityByName(thisName);
 			EntityPlayer otherPlayer = world.getPlayerEntityByName(otherName);
 			
 			if (thisPlayer != null) thisPlayer.addChatMessage(new ChatComponentText("You declared war on " + otherName + "!"));
-			if (otherPlayer != null) otherPlayer.addChatMessage(new ChatComponentText(thisName + " declared war on you!")); 
+			if (otherPlayer != null) otherPlayer.addChatMessage(new ChatComponentText(thisName + " declared war on you!"));
+			
+			// Make other faction angry
+			updateRelations(world, otherName, thisName, (byte) -100);
 		} else if (oldValue < 0 && value >= 0) {
 			// Send messages
 			EntityPlayer thisPlayer = world.getPlayerEntityByName(thisName);
@@ -155,11 +161,13 @@ public class GuardEventHandler implements Serializable {
 	
 	public static void read(ObjectInputStream ois) {
 		try {
-			relations = (Map<String, Map<String, Byte>>) ois.readObject();
-			numGuards = (Map<String, Integer>) ois.readObject();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			relations = (ConcurrentHashMap<String, Map<String, Byte>>) ois.readObject();
+			numGuards = (ConcurrentHashMap<String, Integer>) ois.readObject();
+		} catch (Exception e) {
+			relations = new ConcurrentHashMap<String, Map<String, Byte>>();
+			numGuards = new ConcurrentHashMap<String, Integer>();
+			
+			System.out.println("Faield to load GuardEventHanlder details! Error:");
 			e.printStackTrace();
 		}
 	}

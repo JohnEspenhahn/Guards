@@ -26,14 +26,14 @@ import com.hahn.guards.entity.IWanderer;
 
 public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
     private int chaseRange;
-    private int wanderRange;
+    private int stationRadius;
     private boolean following;
 	
 	public EntityStoneGolem(World world) {
         super(world);
         
         this.chaseRange = 32;
-        this.wanderRange = 12;
+        this.stationRadius = 12;
         this.following = false;
         
         this.tasks.taskEntries.clear();
@@ -117,8 +117,18 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
 	protected void dropFewItems(boolean par1, int par2) { }
 	
 	@Override
+    public void setHomeArea(int x, int y, int z, int radius) {
+        super.setHomeArea(x, y, z, radius);
+        this.setStationRadius(radius);
+    }
+	
+	public void setStationRadius(int r) {
+        this.stationRadius = r;
+    }
+	
+	@Override
 	public int getStationRadius() {
-		return wanderRange;
+		return stationRadius;
 	}
 	
 	public boolean isFollowing() {

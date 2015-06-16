@@ -85,7 +85,7 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 	public void updateEntity() {
 		super.updateEntity();
 		
-		if (!worldObj.isRemote && --spawnDelay <= 0) {
+		if (!worldObj.isRemote && getOwnerName() != null && --spawnDelay <= 0) {
 			spawnDelay = 60;
 			
 			int has = getAvaliable();
@@ -96,10 +96,11 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 				
 				EntityIronGolem golem = new EntityStoneGolem(worldObj);
 				golem.getEntityData().setString("ownerName", getOwnerName());
+				golem.setHomeArea(xCoord, yCoord, zCoord, 8);
 				
-				golem.setPosition(this.xCoord, this.yCoord, this.zCoord);
-				Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(golem, 6, 4, Vec3.createVectorHelper(this.xCoord, this.yCoord, this.zCoord));
-				golem.setPosition(vec3.xCoord, vec3.yCoord + 1, vec3.zCoord);
+				golem.setPosition(xCoord, yCoord, zCoord);
+				Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(golem, 6, 2, Vec3.createVectorHelper(this.xCoord, this.yCoord, this.zCoord));
+				golem.setPosition(vec3.xCoord, vec3.yCoord + 2, vec3.zCoord);
 				
 				GuardEventHandler.addNumGuards(getOwnerName(), 1);
 				

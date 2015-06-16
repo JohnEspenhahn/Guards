@@ -13,13 +13,13 @@ public class GuiHandler implements IGuiHandler {
     public static final byte GUARD_SPAWNER = 1;
     
 	@Override
-	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {		
+	public Object getServerGuiElement(int id, EntityPlayer player, World world, int xOrID, int y, int z) {		
 		Entity e;
 		TileEntity te;
 	    
 	    switch (id) {
 		case GUARD_SPAWNER:
-		    te = world.getTileEntity(x, y, z);
+		    te = world.getTileEntity(xOrID, y, z);
             if (te != null && te instanceof TileEntityGuardSpawner) 
                 return new ContainerGuardSpawner(player.inventory, (TileEntityGuardSpawner) te);
             break;
@@ -29,13 +29,13 @@ public class GuiHandler implements IGuiHandler {
 	}
 
 	@Override
-	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {		
+	public Object getClientGuiElement(int id, EntityPlayer player, World world, int xOrID, int y, int z) {		
 	    Entity e;
 	    TileEntity te;
         
         switch (id) {
         case GUARD_SPAWNER:
-            te = world.getTileEntity(x, y, z);
+            te = world.getTileEntity(xOrID, y, z);
             if (te != null && te instanceof TileEntityGuardSpawner) 
                 return new GuiGuardSpawner(player.inventory, (TileEntityGuardSpawner) te);
             break;

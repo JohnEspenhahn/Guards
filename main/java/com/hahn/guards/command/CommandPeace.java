@@ -13,6 +13,11 @@ public class CommandPeace extends CommandBase {
 	public String getCommandName() {
 		return "peace";
 	}
+	
+	@Override
+	public boolean canCommandSenderUseCommand(ICommandSender sender) {
+		return sender instanceof EntityPlayer;
+	}
 
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
@@ -26,7 +31,7 @@ public class CommandPeace extends CommandBase {
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (sender instanceof EntityPlayer) {
-			if (args.length == 1) {
+			if (args.length >= 1) {
 				if (sender.getCommandSenderName().equals(args[0])) return;
 				
 				GuardEventHandler.updateRelations(sender.getEntityWorld(), sender.getCommandSenderName(), args[0], 100);
@@ -36,6 +41,8 @@ public class CommandPeace extends CommandBase {
 				if (p == null && !hasRelations) {
 					sender.addChatMessage(new ChatComponentText("The player " + args[0] + " could not be found. They may just not be logged in."));
 				}
+			} else {
+				sender.addChatMessage(new ChatComponentText("You must specify someone to try and reach peace with!"));
 			}
 		}
 	}

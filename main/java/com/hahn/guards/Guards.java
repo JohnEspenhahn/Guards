@@ -89,7 +89,13 @@ public class Guards {
 		}
     }
     
-    public File getSaveFile() {
-    	return new File(DimensionManager.getCurrentSaveRootDirectory(), "guards.data");
+    public File getSaveFile() throws IOException {
+    	File dir = DimensionManager.getCurrentSaveRootDirectory();
+    	if (!dir.exists()) dir.mkdirs();
+    	
+    	File f = new File(dir, "guards.data");
+    	if (!f.exists()) f.createNewFile();
+    	
+    	return f;
     }
 }

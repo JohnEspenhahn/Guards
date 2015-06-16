@@ -16,6 +16,11 @@ public class CommandRelations extends CommandBase {
 	public String getCommandName() {
 		return "relations";
 	}
+	
+	@Override
+	public boolean canCommandSenderUseCommand(ICommandSender sender) {
+		return sender instanceof EntityPlayer;
+	}
 
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
@@ -30,9 +35,14 @@ public class CommandRelations extends CommandBase {
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (sender instanceof EntityPlayer) {
 			Map<String, Byte> relations = GuardEventHandler.getRelationsMap(sender.getCommandSenderName());
-			for (Entry<String, Byte> r: relations.entrySet()) {
-				String state = (r.getValue() < 0 ? "WAR" : "PEACE");
-				sender.addChatMessage(new ChatComponentText(r.getKey() + " [" + state + "] " + r.getValue()));
+			if (relations.size() == 0) {
+				sender.addChatMessage(new ChatComponentText("You have no relations"));
+			} else {
+				sender.addChatMessage(new ChatComponentText("Your relations:"));
+				for (Entry<String, Byte> r: relations.entrySet()) {
+					String state = (r.getValue() < 0 ? "WAR" : "PEACE");
+					sender.addChatMessage(new ChatComponentText(r.getKey() + " [" + state + "] " + r.getValue()));
+				}
 			}
 		}
 	}
