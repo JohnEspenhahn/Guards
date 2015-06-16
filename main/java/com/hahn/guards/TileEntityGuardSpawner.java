@@ -14,8 +14,7 @@ import net.minecraft.util.Vec3;
 
 public class TileEntityGuardSpawner extends TileEntityDispenser {
 	private static final int SPAWN_DELAY = 60;
-	private static final int AMNT_NEEDED = 3 * 64;
-	private static final float QUANTITY_MODIFIER = 1.5f;
+	private static final int AMNT_NEEDED = 3 * 16;
 	
 	private int spawnDelay = SPAWN_DELAY;
 	private String ownerName;
@@ -32,25 +31,14 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 		return this.ownerName;
 	}
 	
-	private EntityPlayer getPlayer() {
-		if (getOwnerName() == null) return null;
-		else return this.getWorldObj().getPlayerEntityByName(getOwnerName());
-	}
-	
 	private int getNeeded() {
-		EntityPlayer p = getPlayer();
-		if (p != null) {
-			int numGuards = GuardEventHandler.getNumGuards(p);			
-			
-			// Return amount needed
-			if (numGuards > 1) {
-				return (int) Math.ceil(AMNT_NEEDED * (QUANTITY_MODIFIER * numGuards));
-			} else {
-				return AMNT_NEEDED;
-			}
+		int numGuards = GuardEventHandler.getNumGuards(worldObj, getOwnerName());
+		
+		// Return amount needed
+		if (numGuards > 1) {
+			return (int) Math.ceil(AMNT_NEEDED * (numGuards * numGuards));
 		} else {
-			// Default if can't find player for some reason
-			return (int) Math.ceil(AMNT_NEEDED * (QUANTITY_MODIFIER * 10));
+			return AMNT_NEEDED;
 		}
 	}
 	
@@ -105,15 +93,13 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 			if (has >= need) {
 				consume(need);
 				
-				EntityIronGolem golem = new EntityIronGolem(worldObj);
-				golem.getEntityData().setString("ownerName", getOwnerName());
+				EntityIronGolem golem = new EntityStoneGolem(worldObj, getOwnerName());
 				
 				golem.setPosition(this.xCoord, this.yCoord, this.zCoord);
 				Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(golem, 6, 4, Vec3.createVectorHelper(this.xCoord, this.yCoord, this.zCoord));
 				golem.setPosition(vec3.xCoord, vec3.yCoord + 1, vec3.zCoord);
 				
-				EntityPlayer p = getPlayer();
-				if (p != null) GuardEventHandler.addNumGuards(p, 1);
+				GuardEventHandler.addNumGuards(worldObj, getOwnerName(), 1);
 				
 				worldObj.spawnEntityInWorld(golem);
 			}
@@ -143,7 +129,6 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
         NBTTagCompound nbt = new NBTTagCompound();
         
         if (getOwnerName() != null) {
-        	System.out.println("Sending owner's name");
         	nbt.setString("ownerName", getOwnerName());
         }
 		
@@ -154,7 +139,6 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
 		super.onDataPacket(net, packet);
 		
-		System.out.println("Got packet data");
 		NBTTagCompound nbt = packet.func_148857_g();
 		if (nbt.hasKey("ownerName")) {
 			setOwnerName(nbt.getString("ownerName"));
