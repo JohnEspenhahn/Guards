@@ -15,8 +15,8 @@ import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.util.Vec3;
 
 public class TileEntityGuardSpawner extends TileEntityDispenser {
-	private static final int SPAWN_DELAY = 60;
-	private static final int AMNT_NEEDED = 3 * 16;
+	public static int SPAWN_DELAY = 60;
+	public static int AMNT_NEEDED = 3 * 16;
 	
 	private int spawnDelay = SPAWN_DELAY;
 	private String ownerName;

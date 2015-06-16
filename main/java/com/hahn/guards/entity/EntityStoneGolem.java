@@ -32,6 +32,8 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
 	public EntityStoneGolem(World world) {
         super(world);
         
+        this.setAlwaysRenderNameTag(true);
+        
         this.tasks.taskEntries.clear();
         this.tasks.addTask(1, new EntityAIAttackOnCollide(this, 1.0D, true));
         this.tasks.addTask(2, new EntityAIGuardFollow(this, 1.0f));
@@ -105,6 +107,7 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
 	
 	public void setOwnerName(String name) {
 		dataWatcher.updateObject(OWNER, name);
+		this.setCustomNameTag(name);
 	}
 	
 	public EntityPlayer getOwner() {

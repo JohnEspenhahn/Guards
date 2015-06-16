@@ -27,8 +27,9 @@ public class GuiGuard extends GuiScreen {
 	public static final ResourceLocation background = new ResourceLocation("guards:textures/gui/GuiGuard.png");
 	public static final ResourceLocation icons = new ResourceLocation("guards:textures/gui/icons.png");
 	
-	private static final int TOGGLE = 0;
+	private static final int TOGGLE = 0, TOGGLE_DIST = 1;
 	
+	private int stationRadius;
     private EntityStoneGolem guard;
     
     /** The X size of the inventory window in pixels. */
@@ -38,6 +39,7 @@ public class GuiGuard extends GuiScreen {
     protected int ySize = 166;
     
     protected GuiButton toggleBtn;
+    protected GuiButton toggleDistBtn;
 
     // For rendering
     private Random rand = new Random();
@@ -47,14 +49,20 @@ public class GuiGuard extends GuiScreen {
         super();
         
         this.guard = guard;
+        
+        this.stationRadius = 8;
     }
     
     @Override
     public void initGui() {
     	super.initGui();
     	
-    	toggleBtn = new GuiButton(TOGGLE, width / 2 - 100, height - 48, "Toggle Stance");
-        buttonList.add(toggleBtn);        
+    	toggleBtn = new GuiButton(TOGGLE, width / 2 - 100, height - 72, "Toggle Stance");
+    	toggleDistBtn = new GuiButton(TOGGLE_DIST, width / 2 - 100, height - 48, "Toggle Station Range");
+    	
+        buttonList.add(toggleBtn);
+        buttonList.add(toggleDistBtn);
+        
         toggleBtn.enabled = true;
     }
 
@@ -84,8 +92,11 @@ public class GuiGuard extends GuiScreen {
         y += lStep;
         
         if (!guard.isFollowing()) {
+        	toggleDistBtn.enabled = true;
         	Text.drawString(fontRendererObj, Text.Align.LEFT, "Station Radius: " + guard.getStationRadius(), x, y, 14737632);
         	y += lStep;
+        } else {
+        	toggleDistBtn.enabled = false;
         }
         
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -99,17 +110,34 @@ public class GuiGuard extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton btn) {
         if (btn.enabled) {
+        	NBTTagCompound nbt = new NBTTagCompound();
         	if (btn.id == TOGGLE) {
-        		NBTTagCompound nbt = new NBTTagCompound();
         		if (guard.isFollowing()) {
-        			EntityStoneGolem.writeGuardStance(nbt, 32, 8, false);
-        			
+        			EntityStoneGolem.writeGuardStance(nbt, 32, stationRadius, false);
         			Guards.net.sendToServer(new SynchGuardStance(guard.getEntityId(), nbt));
         		} else {
         			EntityStoneGolem.writeGuardStance(nbt, 32, 0, true);
-        			
         			Guards.net.sendToServer(new SynchGuardStance(guard.getEntityId(), nbt));
         		}
+        	} else if (btn.id == TOGGLE_DIST) {
+        		switch (stationRadius) {
+        		case 8: 
+        			stationRadius = 12;
+        			break;
+        		case 12:
+        			stationRadius = 2;
+        			break;
+        		case 2:
+        			stationRadius = 4;
+        			break;
+        		case 4:
+        		default:
+        			stationRadius = 8;
+        			break;
+        		}
+        		
+        		EntityStoneGolem.writeGuardStance(nbt, guard.getChaseRange(), stationRadius, guard.isFollowing());
+    			Guards.net.sendToServer(new SynchGuardStance(guard.getEntityId(), nbt));
         	}
         }
     }

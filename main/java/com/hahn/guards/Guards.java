@@ -28,6 +28,7 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -50,6 +51,11 @@ public class Guards {
     public static SimpleNetworkWrapper net;
     
     public static Block GuardSpawnerBlock;
+    
+    @EventHandler
+    public void PreInit(FMLPreInitializationEvent event){
+    	ConfigHandler.init(event.getSuggestedConfigurationFile());
+    }
     
     @EventHandler
     public void init(FMLInitializationEvent event) {
