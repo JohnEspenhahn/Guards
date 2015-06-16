@@ -22,7 +22,7 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 	public void setOwnerName(String name) {
 		this.ownerName = name;
 		
-		if (!worldObj.isRemote) {
+		if (worldObj != null && !worldObj.isRemote) {
 			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 		}
 	}
@@ -32,7 +32,8 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 	}
 	
 	private int getNeeded() {
-		int numGuards = GuardEventHandler.getNumGuards(worldObj, getOwnerName());
+		int numGuards = GuardEventHandler.getNumGuards(getOwnerName());
+		System.out.println(getOwnerName() + " has " + numGuards);
 		
 		// Return amount needed
 		if (numGuards > 1) {
@@ -93,13 +94,14 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 			if (has >= need) {
 				consume(need);
 				
-				EntityIronGolem golem = new EntityStoneGolem(worldObj, getOwnerName());
+				EntityIronGolem golem = new EntityStoneGolem(worldObj);
+				golem.getEntityData().setString("ownerName", getOwnerName());
 				
 				golem.setPosition(this.xCoord, this.yCoord, this.zCoord);
 				Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(golem, 6, 4, Vec3.createVectorHelper(this.xCoord, this.yCoord, this.zCoord));
 				golem.setPosition(vec3.xCoord, vec3.yCoord + 1, vec3.zCoord);
 				
-				GuardEventHandler.addNumGuards(worldObj, getOwnerName(), 1);
+				GuardEventHandler.addNumGuards(getOwnerName(), 1);
 				
 				worldObj.spawnEntityInWorld(golem);
 			}

@@ -29,16 +29,12 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
     private int wanderRange;
     private boolean following;
 	
-	public EntityStoneGolem(World world, String ownerName) {
+	public EntityStoneGolem(World world) {
         super(world);
         
         this.chaseRange = 32;
         this.wanderRange = 12;
         this.following = false;
-        
-        NBTTagCompound tag = world.getWorldInfo().getNBTTagCompound();
-        
-        this.getEntityData().setString("ownerName", ownerName);
         
         this.tasks.taskEntries.clear();
         this.tasks.addTask(1, new EntityAIAttackOnCollide(this, 1.0D, true));
@@ -69,7 +65,7 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
 		} else {
 			String factionName = GuardEventHandler.getFactionName(e);
 			if (factionName == null) return false;
-			else return GuardEventHandler.getReputation(worldObj, getOwnerName(), factionName) < 0;
+			else return GuardEventHandler.getRelations(getOwnerName(), factionName) < 0;
 		}
 	}
 	
@@ -112,7 +108,7 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
 			String factionName = GuardEventHandler.getFactionName(sourceEntity);
 			if (factionName != null) {
 				// Killing guard causes -10 reputation
-				GuardEventHandler.updateReputation(worldObj, getOwnerName(), factionName, -10);
+				GuardEventHandler.updateRelations(worldObj, getOwnerName(), factionName, -10);
 			}
 		}
 	}
