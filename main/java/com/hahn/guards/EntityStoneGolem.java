@@ -22,39 +22,92 @@ import net.minecraft.world.World;
 import com.hahn.guards.entity.EntityAIMoveToHome;
 import com.hahn.guards.entity.EntityAIGuardFollow;
 import com.hahn.guards.entity.GuardEntitySelector;
+import com.hahn.guards.entity.IOwned;
 import com.hahn.guards.entity.IWanderer;
 
-public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
-    private int chaseRange;
-    private int stationRadius;
-    private boolean following;
+public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwned {
+	private static int FOLLOWING = 13, CHASE = 14, STATION = 15, OWNER = 19;
 	
 	public EntityStoneGolem(World world) {
         super(world);
         
-        this.chaseRange = 32;
-        this.stationRadius = 12;
-        this.following = false;
-        
         this.tasks.taskEntries.clear();
         this.tasks.addTask(1, new EntityAIAttackOnCollide(this, 1.0D, true));
-        this.tasks.addTask(2, new EntityAIMoveToHome(this, 1.0D));
-        this.tasks.addTask(3, new EntityAIGuardFollow(this, 1.0f));
-        this.tasks.addTask(3, new EntityAIWander(this, 0.6D));
-        this.tasks.addTask(4, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-        this.tasks.addTask(5, new EntityAILookIdle(this));
+        this.tasks.addTask(2, new EntityAIGuardFollow(this, 1.0f));
+        this.tasks.addTask(3, new EntityAIMoveToHome(this, 1.0D));
+        this.tasks.addTask(4, new EntityAIWander(this, 0.6D));
+        this.tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+        this.tasks.addTask(6, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, new GuardEntitySelector(this)));
     }
 	
+	@Override
+    protected void entityInit() {
+        super.entityInit();
+
+        dataWatcher.addObject(FOLLOWING, (byte) 1); // following
+        dataWatcher.addObject(CHASE, (int) 32); // chase range
+        dataWatcher.addObject(STATION, (int) 8); // station distance
+        dataWatcher.addObject(OWNER, ""); // owner name
+    }
+	
+	public boolean isFollowing() {
+		return dataWatcher.getWatchableObjectByte(FOLLOWING) != 0;
+	}
+	
+	public void setFollowing(boolean following) {
+		dataWatcher.updateObject(FOLLOWING, (byte) (following ? 1 : 0));
+		if (following) detachHome();
+	}
+	
+	public int getChaseRange() {
+		return dataWatcher.getWatchableObjectInt(CHASE);
+	}
+	
+	public void setChaseRange(int val) {
+		dataWatcher.updateObject(CHASE, val);
+	}
+	
+	@Override
+	public int getStationRadius() {
+		return dataWatcher.getWatchableObjectInt(STATION);
+	}
+	
+	public void setStationRadius(int val) {
+		dataWatcher.updateObject(STATION, val);
+	}
+	
+	@Override
 	public String getOwnerName() {
-		return getEntityData().getString("ownerName");
+		return dataWatcher.getWatchableObjectString(OWNER);
+	}
+	
+	public void setOwnerName(String name) {
+		dataWatcher.updateObject(OWNER, name);
 	}
 	
 	public EntityPlayer getOwner() {
-		String ownerName = getOwnerName();
+		return worldObj.getPlayerEntityByName(getOwnerName());
+	}
+	
+	@Override
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+		super.writeEntityToNBT(nbt);
 		
-		if (ownerName == null) return null;
-		else return worldObj.getPlayerEntityByName(ownerName);
+		nbt.setInteger("chaseRange", getChaseRange());
+		nbt.setInteger("stationRadius", getStationRadius());
+		nbt.setBoolean("following", isFollowing());
+		nbt.setString("ownerName", getOwnerName());
+	}
+	
+	@Override
+	public void readEntityFromNBT(NBTTagCompound nbt) {
+		super.readEntityFromNBT(nbt);
+		
+		setChaseRange(nbt.getInteger("chaseRange"));
+		setStationRadius(nbt.getInteger("stationRadius"));
+		setFollowing(nbt.getBoolean("following"));
+		setOwnerName(nbt.getString("ownerName"));
 	}
 	
 	public boolean isSuitableTarget(Entity e) {
@@ -78,23 +131,19 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
 	public void setAttackTarget(EntityLivingBase entity) {
 	    // Try targeting old target's family
 		EntityLivingBase target = getAttackTarget();
-	    if (entity == null && target != null) {
-	        NBTTagCompound targetNBT = target.getEntityData();
-	        
-	        if (targetNBT.hasKey("ownerName")) {
-	        	String targetOwner = targetNBT.getString("ownerName");
-	        	
-	            AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(target.posX-20, target.posY-10, target.posZ-20, target.posX+20, target.posY+10, target.posZ+20);
-                List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
-                for (EntityLivingBase newTarget: list) {
-                	// Target from same owner
-                	String factionName = GuardEventHandler.getFactionName(newTarget);
-                    if (factionName != null && factionName.equals(targetOwner)) {
-                        super.setAttackTarget(newTarget);
-                        return;
-                    }
+	    if (entity == null && target instanceof IOwned) {
+        	String targetOwner = ((IOwned) target).getOwnerName();
+        	
+            AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(target.posX-20, target.posY-10, target.posZ-20, target.posX+20, target.posY+10, target.posZ+20);
+            List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
+            for (EntityLivingBase newTarget: list) {
+            	// Target from same owner
+            	String factionName = GuardEventHandler.getFactionName(newTarget);
+                if (factionName != null && factionName.equals(targetOwner)) {
+                    super.setAttackTarget(newTarget);
+                    return;
                 }
-	        }
+            }
 	    }
 	    
 	    // Otherwise default
@@ -111,6 +160,8 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
 				GuardEventHandler.updateRelations(worldObj, getOwnerName(), factionName, -10);
 			}
 		}
+		
+		GuardEventHandler.addNumGuards(getOwnerName(), -1);
 	}
 	
 	@Override
@@ -119,19 +170,28 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer {
 	@Override
     public void setHomeArea(int x, int y, int z, int radius) {
         super.setHomeArea(x, y, z, radius);
-        this.setStationRadius(radius);
-    }
-	
-	public void setStationRadius(int r) {
-        this.stationRadius = r;
+        setStationRadius(radius);
     }
 	
 	@Override
-	public int getStationRadius() {
-		return stationRadius;
-	}
+    public void detachHome() {
+        super.detachHome();
+        setStationRadius(-1);
+    }
 	
-	public boolean isFollowing() {
-		return following;
-	}
+	@Override
+    public boolean interact(EntityPlayer player) {		
+        if (player.getCommandSenderName().equals(getOwnerName())) {
+            openGui(player);
+            return true;
+        } else {
+        	return false;
+        }
+    }
+
+    protected void openGui(EntityPlayer player) {
+        if (worldObj.isRemote) {
+        	player.openGui(Guards.instance, GuiHandler.GUARD, worldObj, getEntityId(), 0, 0);
+        }
+    }
 }

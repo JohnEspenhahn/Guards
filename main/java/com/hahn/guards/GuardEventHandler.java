@@ -14,6 +14,9 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+
+import com.hahn.guards.entity.IOwned;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class GuardEventHandler implements Serializable {
@@ -22,8 +25,8 @@ public class GuardEventHandler implements Serializable {
 	
 	@SubscribeEvent
 	public void onLivingDeathEvent(LivingDeathEvent e) {
-		if (!e.entity.worldObj.isRemote && e.entity.getEntityData().hasKey("ownerName")) {
-			String ownerName = e.entity.getEntityData().getString("ownerName");
+		if (!e.entity.worldObj.isRemote && e.entity instanceof IOwned) {
+			String ownerName = ((IOwned) e.entity).getOwnerName();
 			GuardEventHandler.addNumGuards(ownerName, -1);
 		}
 	}
@@ -32,11 +35,11 @@ public class GuardEventHandler implements Serializable {
 	public void onLivingAttackEvent(LivingAttackEvent e) {
 		// Damage reputation when just attacking an entity
 		World world = e.entity.worldObj;
-		if (!world.isRemote && e.source.getEntity() != null && e.entity.getEntityData().hasKey("ownerName")) {
+		if (!world.isRemote && e.source.getEntity() != null && e.entity instanceof IOwned) {
 			String factionName = getFactionName(e.source.getEntity());
 			
 			if (factionName != null) {
-				String ownerName = e.entity.getEntityData().getString("ownerName");
+				String ownerName = ((IOwned) e.entity).getOwnerName();
 				System.out.println("Attacked golem of " + ownerName);
 				updateRelations(world, ownerName, factionName, -1);
 			}
@@ -53,8 +56,8 @@ public class GuardEventHandler implements Serializable {
 			return null;
 		} else if (e instanceof EntityPlayer) {
 			return e.getCommandSenderName();
-		} else if (e.getEntityData().hasKey("ownerName")) {
-			return e.getEntityData().getString("ownerName");
+		} else if (e instanceof IOwned) {
+			return ((IOwned) e).getOwnerName();
 		} else {
 			return null;
 		}

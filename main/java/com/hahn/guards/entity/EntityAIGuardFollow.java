@@ -6,7 +6,7 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.Vec3;
 
 import com.hahn.guards.EntityStoneGolem;
-import com.hahn.guards.Util;
+import com.hahn.guards.util.Util;
 
 public class EntityAIGuardFollow extends EntityAIBase {
     public static final int START_DIST = 3, TELEPORT_DIST = 13;

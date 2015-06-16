@@ -94,8 +94,8 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 			if (has >= need) {
 				consume(need);
 				
-				EntityIronGolem golem = new EntityStoneGolem(worldObj);
-				golem.getEntityData().setString("ownerName", getOwnerName());
+				EntityStoneGolem golem = new EntityStoneGolem(worldObj);
+				golem.setOwnerName(getOwnerName());
 				golem.setHomeArea(xCoord, yCoord, zCoord, 8);
 				
 				golem.setPosition(xCoord, yCoord, zCoord);
