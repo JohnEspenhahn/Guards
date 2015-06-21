@@ -88,7 +88,7 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 		super.updateEntity();
 		
 		if (!worldObj.isRemote && getOwnerName() != null && --spawnDelay <= 0) {
-			spawnDelay = 60;
+			spawnDelay = TileEntityGuardSpawner.SPAWN_DELAY;
 			
 			int has = getAvaliable();
 			int need = getNeeded();
@@ -102,9 +102,7 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 				golem.setChaseRange(32);
 				golem.setFollowing(false);
 				
-				golem.setPosition(xCoord, yCoord, zCoord);
-				Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(golem, 6, 2, Vec3.createVectorHelper(this.xCoord, this.yCoord, this.zCoord));
-				golem.setPosition(vec3.xCoord, vec3.yCoord + 2, vec3.zCoord);
+				golem.setPosition(xCoord + 0.5, yCoord + 1, zCoord + 0.5);
 				
 				GuardEventHandler.addNumGuards(getOwnerName(), 1);
 				

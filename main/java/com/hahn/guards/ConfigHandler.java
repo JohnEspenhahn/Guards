@@ -11,8 +11,11 @@ public class ConfigHandler {
 
 		config.load();
 
-		TileEntityGuardSpawner.SPAWN_DELAY = config.get("Guard Spawner", "Delay", 60).getInt();
+		TileEntityGuardSpawner.SPAWN_DELAY = config.get("Guard Spawner", "Delay", 30*30).getInt();
+		System.out.println(Guards.MODID + " " + Guards.VERSION + " guard spawner delay " + TileEntityGuardSpawner.SPAWN_DELAY);
+		
 		TileEntityGuardSpawner.AMNT_NEEDED = config.get("Guard Spawner", "Cost", 3*16).getInt();
+		System.out.println(Guards.MODID + " " + Guards.VERSION + " guard spawner cost " + TileEntityGuardSpawner.AMNT_NEEDED);
 
 		config.save();
 	}

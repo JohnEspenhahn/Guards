@@ -35,6 +35,8 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
         this.setAlwaysRenderNameTag(true);
         
         this.tasks.taskEntries.clear();
+        this.targetTasks.taskEntries.clear();
+        
         this.tasks.addTask(1, new EntityAIAttackOnCollide(this, 1.0D, true));
         this.tasks.addTask(2, new EntityAIGuardFollow(this, 1.0f));
         this.tasks.addTask(3, new EntityAIMoveToHome(this, 1.0D));

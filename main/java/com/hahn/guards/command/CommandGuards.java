@@ -10,11 +10,11 @@ import net.minecraft.util.ChatComponentText;
 
 import com.hahn.guards.GuardEventHandler;
 
-public class CommandRelations extends CommandBase {
+public class CommandGuards extends CommandBase {
 
 	@Override
 	public String getCommandName() {
-		return "relations";
+		return "guards";
 	}
 	
 	@Override
@@ -25,24 +25,22 @@ public class CommandRelations extends CommandBase {
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
 		if (sender instanceof EntityPlayer) {
-            return "/relations  Print your relations with other players";
+            return "/guards  Print details on your guards";
         } else {
-        	return "Only players can use /relations";
+        	return "Only players can use /guards";
         }
 	}
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (sender instanceof EntityPlayer) {
-			Map<String, Byte> relations = GuardEventHandler.getRelationsMap(sender.getCommandSenderName());
-			if (relations.size() == 0) {
-				sender.addChatMessage(new ChatComponentText("You have no relations"));
+			int numGuards = GuardEventHandler.getNumGuards(sender.getCommandSenderName());
+			if (numGuards == 0) {
+				sender.addChatMessage(new ChatComponentText("You have no guards"));
+			} else if (numGuards > 1) {
+				sender.addChatMessage(new ChatComponentText("Your have " + numGuards + " guards"));
 			} else {
-				sender.addChatMessage(new ChatComponentText("Your relations:"));
-				for (Entry<String, Byte> r: relations.entrySet()) {
-					String state = (r.getValue() < 0 ? "WAR" : "PEACE");
-					sender.addChatMessage(new ChatComponentText(r.getKey() + " [" + state + "] " + r.getValue()));
-				}
+				sender.addChatMessage(new ChatComponentText("You have 1 guard"));
 			}
 		}
 	}

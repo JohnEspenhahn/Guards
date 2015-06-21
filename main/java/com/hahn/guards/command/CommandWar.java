@@ -22,7 +22,7 @@ public class CommandWar extends CommandBase {
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
 		if (sender instanceof EntityPlayer) {
-            return "Declare war on another player /war 'playername'";
+            return "/war <playername>  Declare war on another player";
         } else {
         	return "Only players can use /war";
         }

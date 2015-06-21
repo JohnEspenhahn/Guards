@@ -17,6 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 
+import com.hahn.guards.command.CommandGuards;
 import com.hahn.guards.command.CommandPeace;
 import com.hahn.guards.command.CommandRelations;
 import com.hahn.guards.command.CommandWar;
@@ -91,6 +92,7 @@ public class Guards {
         manager.registerCommand(new CommandWar());
         manager.registerCommand(new CommandPeace());
         manager.registerCommand(new CommandRelations());
+        manager.registerCommand(new CommandGuards());
     }
     
     @EventHandler
@@ -108,7 +110,7 @@ public class Guards {
     	File dir = DimensionManager.getCurrentSaveRootDirectory();
     	if (!dir.exists()) dir.mkdirs();
     	
-    	File f = new File(dir, "guards.data");
+    	File f = new File(dir, "guards.dat");
     	if (!f.exists()) f.createNewFile();
     	
     	return f;

@@ -22,7 +22,7 @@ public class CommandPeace extends CommandBase {
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
 		if (sender instanceof EntityPlayer) {
-            return "Try to reach peace with another player /peace 'playername'";
+            return "/peace <playername>  Try to reach peace with another player";
         } else {
         	return "Only players can use /peace";
         }
