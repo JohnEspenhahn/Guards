@@ -25,9 +25,10 @@ import net.minecraft.world.World;
 import com.hahn.guards.GuardEventHandler;
 import com.hahn.guards.Guards;
 import com.hahn.guards.GuiHandler;
+import com.hahn.guards.util.GuardColor;
 
 public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwned {
-	private static int FOLLOWING = 13, CHASE = 14, STATION = 15, OWNER = 19;
+	private static int FOLLOWING = 13, CHASE = 14, STATION = 15, OWNER = 19, COLOR = 24;
 	
 	public EntityStoneGolem(World world) {
         super(world);
@@ -74,7 +75,16 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
         dataWatcher.addObject(CHASE, (int) 32); // chase range
         dataWatcher.addObject(STATION, (int) 8); // station distance
         dataWatcher.addObject(OWNER, ""); // owner name
+        dataWatcher.addObject(COLOR, (byte) 0);
     }
+	
+	public GuardColor getColor() {
+		return GuardColor.fromCode(dataWatcher.getWatchableObjectByte(COLOR));
+	}
+	
+	public void setColor(GuardColor color) {
+		dataWatcher.updateObject(COLOR, color.toCode());
+	}
 	
 	public boolean isFollowing() {
 		return dataWatcher.getWatchableObjectByte(FOLLOWING) != 0;
@@ -109,7 +119,8 @@ public class EntityStoneGolem extends EntityIronGolem implements IWanderer, IOwn
 	
 	public void setOwnerName(String name) {
 		dataWatcher.updateObject(OWNER, name);
-		this.setCustomNameTag(name);
+		
+		this.setCustomNameTag(name + "'s Guard");
 	}
 	
 	public EntityPlayer getOwner() {

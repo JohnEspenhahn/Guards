@@ -13,13 +13,13 @@ import org.lwjgl.opengl.GL11;
 import com.hahn.guards.entity.EntityStoneGolem;
 
 public class RenderStoneGolem extends RenderIronGolem {
-	private static final ResourceLocation stoneGolemTextures = new ResourceLocation("guards:textures/entities/stone_golem.png");
+	private static final ResourceLocation golems; //  = new ResourceLocation("guards:textures/entities/stone_golem.png");
 
     public RenderStoneGolem() {
         super();
     }
 
     protected ResourceLocation getIronGolemTextures(EntityIronGolem par1EntityIronGolem) {
-        return stoneGolemTextures;
+        return golems;
     }
 }

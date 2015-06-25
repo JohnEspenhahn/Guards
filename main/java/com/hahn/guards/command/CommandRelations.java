@@ -7,8 +7,10 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
 import com.hahn.guards.GuardEventHandler;
+import com.hahn.guards.util.GuardColor;
 
 public class CommandRelations extends CommandBase {
 
@@ -41,7 +43,16 @@ public class CommandRelations extends CommandBase {
 				sender.addChatMessage(new ChatComponentText("Your relations:"));
 				for (Entry<String, Byte> r: relations.entrySet()) {
 					String state = (r.getValue() < 0 ? "WAR" : "PEACE");
-					sender.addChatMessage(new ChatComponentText(r.getKey() + " [" + state + "] " + r.getValue()));
+					String name = r.getKey();
+					
+					ChatComponentText chat = new ChatComponentText(name);
+					GuardColor c = GuardEventHandler.getColor(name);
+					chat.getChatStyle().setColor(EnumChatFormatting.getValueByName(c.name()));
+					
+					ChatComponentText chatMain = new ChatComponentText(" [" + state + "] " + r.getValue());
+					chat.appendSibling(chatMain);
+					
+					sender.addChatMessage(chat);
 				}
 			}
 		}

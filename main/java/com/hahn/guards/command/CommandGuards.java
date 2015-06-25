@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 
 import com.hahn.guards.GuardEventHandler;
+import com.hahn.guards.TileEntityGuardSpawner;
 
 public class CommandGuards extends CommandBase {
 
@@ -34,7 +35,8 @@ public class CommandGuards extends CommandBase {
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (sender instanceof EntityPlayer) {
-			int numGuards = GuardEventHandler.getNumGuards(sender.getCommandSenderName());
+			String ownerName = sender.getCommandSenderName();
+			int numGuards = GuardEventHandler.getNumGuards(ownerName);
 			if (numGuards == 0) {
 				sender.addChatMessage(new ChatComponentText("You have no guards"));
 			} else if (numGuards > 1) {
@@ -42,6 +44,8 @@ public class CommandGuards extends CommandBase {
 			} else {
 				sender.addChatMessage(new ChatComponentText("You have 1 guard"));
 			}
+			
+			sender.addChatMessage(new ChatComponentText("You need " + TileEntityGuardSpawner.getFoodNeeded(ownerName) + " hunger worth of food for next guard spawn"));
 		}
 	}
 

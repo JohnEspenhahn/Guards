@@ -33,9 +33,8 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 		return this.ownerName;
 	}
 	
-	private int getNeeded() {
-		int numGuards = GuardEventHandler.getNumGuards(getOwnerName());
-		System.out.println(getOwnerName() + " has " + numGuards);
+	public static int getFoodNeeded(String ownerName) {
+		int numGuards = GuardEventHandler.getNumGuards(ownerName);
 		
 		// Return amount needed
 		if (numGuards > 1) {
@@ -91,12 +90,13 @@ public class TileEntityGuardSpawner extends TileEntityDispenser {
 			spawnDelay = TileEntityGuardSpawner.SPAWN_DELAY;
 			
 			int has = getAvaliable();
-			int need = getNeeded();
+			int need = getFoodNeeded(getOwnerName());
 			
 			if (has >= need) {
 				consume(need);
 				
 				EntityStoneGolem golem = new EntityStoneGolem(worldObj);
+				golem.setColor(GuardEventHandler.getColor(getOwnerName()));
 				golem.setOwnerName(getOwnerName());
 				golem.setHomeArea(xCoord, yCoord, zCoord, 8);
 				golem.setChaseRange(32);

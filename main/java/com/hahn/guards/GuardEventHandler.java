@@ -12,14 +12,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 import com.hahn.guards.entity.IOwned;
+import com.hahn.guards.util.GuardColor;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class GuardEventHandler implements Serializable {
+	private static Map<String, GuardColor> colors = new ConcurrentHashMap<String, GuardColor>();
 	private static Map<String, Map<String, Byte>> relations = new ConcurrentHashMap<String, Map<String, Byte>>();
 	private static Map<String, Integer> numGuards = new ConcurrentHashMap<String, Integer>();
 	
@@ -45,6 +48,12 @@ public class GuardEventHandler implements Serializable {
 			}
 		}
 	} 
+	
+	@SubscribeEvent
+	public void onPlayerJoin(EntityJoinWorldEvent e) {
+		// Generate color
+		this.getColor(e.entity.getCommandSenderName());
+	}
 	
 	/**
 	 * Attempt to get the faction of the given entity
@@ -157,6 +166,7 @@ public class GuardEventHandler implements Serializable {
 		try {
 			oos.writeObject(relations);
 			oos.writeObject(numGuards);
+			oos.writeObject(colors);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -166,6 +176,7 @@ public class GuardEventHandler implements Serializable {
 		try {
 			relations = (ConcurrentHashMap<String, Map<String, Byte>>) ois.readObject();
 			numGuards = (ConcurrentHashMap<String, Integer>) ois.readObject();
+			colors    = (ConcurrentHashMap<String, GuardColor>) ois.readObject();
 		} catch (Exception e) {
 			relations = new ConcurrentHashMap<String, Map<String, Byte>>();
 			numGuards = new ConcurrentHashMap<String, Integer>();
@@ -173,5 +184,23 @@ public class GuardEventHandler implements Serializable {
 			System.out.println("Faield to load GuardEventHanlder details! Error:");
 			e.printStackTrace();
 		}
+	}
+
+	public static GuardColor getColor(String ownerName) {
+		GuardColor thisColor = colors.get(ownerName);
+		if (thisColor == null) {
+			synchronized(colors) {
+				int nextCode = 0;
+				for (GuardColor c: colors.values()) {
+					if (nextCode <= c.toCode()) nextCode = c.toCode() + 1;
+				}
+				
+				thisColor = GuardColor.fromCode(nextCode);
+				if (thisColor == null) throw new RuntimeException("Out of guard color codes!");
+				else colors.put(ownerName, thisColor);
+			}
+		}
+		
+		return thisColor;
 	}
 }
